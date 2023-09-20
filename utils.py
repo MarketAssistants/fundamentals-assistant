@@ -28,6 +28,8 @@ def get_company_facts(cik):
     
     #now it is like traversing a forest of dictionaries 
     # check .keys() to see the path ahead and direct yourself to the data you are looking for
+    print("printing keys:")
+    print(facts_json['facts'].keys())
 
     return facts_json['facts']['us-gaap']
 
