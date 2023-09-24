@@ -1,17 +1,30 @@
-import plotly.express as px
-import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
-# Sample data (you can replace this with your own data)
-data = pd.DataFrame({'Names': ['yacine', 'boussad', 'salim', 'nadji', 'tahar', 'nacer', 'anis', 'yanis', 'kamel', 'hani', 'ahcene', 'ouchen', 'ahmad', 'ikram', 'amir'], 
-                     'Scores':[450, 350, 330, 370, 200, 250, 270, 290, 300, 300, 30, 100, 120, 130,110]})
-df_sorted = data.sort_values(by='Scores')
-length = len(data['Names'])
-print("length is: ", length)
 
-# Create an interactive histogram using Plotly Express
-# help(px.histogram)
-fig = px.histogram(df_sorted, x='Names', y='Scores', nbins=5, title='Interactive Histogram')
+def plot_histogram(data, ratio_name): 
+    # num_bins = int(1 + np.log2(len(data))) #sturges
+    # print("number of bins:", num_bins)
+    # num_bins = int((max(data) - min(data)) / bin_width) #scott
+    # num_bins = int(np.sqrt(len(data))) #square root
+    num_bins = 100 
+    # num_bins = int(np.max(data)-np.min(data))
 
-np.histogram(Scores, bins=5)
-# Show the plot (in a Jupyter notebook, it will be displayed inline)
-fig.show()
+    # Create a histogram
+    plt.hist(data, bins=num_bins, edgecolor='k')  # Adjust the number of bins as needed
+    plt.xlabel(f"{ratio_name}")
+    plt.ylabel('Frequency')
+    plt.title('Histogram of a Continuous Variable')
+    plt.grid(True)
+
+    # Show the histogram
+    plt.show()
+
+def plot_xy(data): 
+    indices = np.arange(len(data))
+    plt.plot(indices, data, marker='o', linestyle='-')
+    plt.xlabel('ticker index')
+    plt.ylabel('reward')
+    plt.title('oooooo')
+    plt.show()
+
