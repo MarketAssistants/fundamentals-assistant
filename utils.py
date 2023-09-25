@@ -61,3 +61,67 @@ def test_only(ticker):
     # plt.xlabel('x')
     # plt.ylabel('y')
     # plt.show()
+
+def get_trailing_eps(concept): 
+    nbr_trailing = 4
+    
+    last_frame= concept.iloc[-1]['frame']
+    len_last_frame = len(last_frame)
+
+    if len_last_frame == 6: 
+        return concept.iloc[-1]['val']
+    else: 
+        year = int(last_frame[2:6])
+        quarter = int(last_frame[7])
+        condition = f"CY{year}Q{quarter}"
+
+    reversed_df = concept.iloc[::-1]
+
+    trailing_eps =0
+    yearly = False
+    year_counter = 4
+    for index, row in reversed_df.iterrows():
+
+        if yearly: 
+            if year_counter == 4 and row['frame'] == condition:
+                year_value = row['val']
+                year_counter -=1
+                condition = f"CY{year}Q{quarter}"
+                nbr_trailing -=1
+
+            elif row['frame'] == condition: 
+                if nbr_trailing !=0: 
+                    trailing_eps += row['val']
+                    nbr_trailing -=1
+                quarter -=1
+                condition = f"CY{year}Q{quarter}"
+                year_value -= row['val']
+                year_counter -=1
+                if year_counter ==0: 
+                    trailing_eps += year_value
+                    return round(trailing_eps,2)
+
+        elif row['frame'] == condition: 
+
+            #3-add-2-add-1-add-0--add
+            nbr_trailing -=1
+            #add it
+            trailing_eps += row['val']
+            #check if we collected the needed quarters
+            if nbr_trailing ==0:
+                return trailing_eps
+
+            if quarter == 1: 
+                quarter =3
+                year -=1
+                condition = f"CY{year}"
+                yearly = True
+            else:
+                quarter -=1
+                condition=f"CY{year}Q{quarter}"
+
+
+
+
+                
+        

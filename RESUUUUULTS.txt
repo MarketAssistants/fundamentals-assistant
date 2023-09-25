@@ -1,1 +1,0 @@
-['NOW', 'ADBE', 'MSFT', 'FFIV', 'PLUS', 'VMW', 'QLYS', 'ORCL', 'AKAM', 'PTC', 'PANW', 'WDAY', 'CVLT', 'PRGS', 'TDC', 'ATEN', 'CALX', 'DT', 'BLKB', 'BOX', 'CRWD', 'CDAY', 'DOCN']
