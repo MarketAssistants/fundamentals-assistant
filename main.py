@@ -7,42 +7,41 @@ import pandas as pd
 import json
 import matplotlib.pyplot as plt
 import pprint
-from filter import get_filtered_list
+from fundamentals_assistant.extra import get_filtered_list
 from plot import plot_histogram, plot_xy
 from copy import deepcopy
 from timing import tomorrow_date, today_date,last_business_day
 from utils import get_ciks, get_company_fillings, get_company_facts, get_company_concept,test_only, get_trailing_eps
 
-#Change these operational variables
-TESTING_ONLY = False
-PRINT_HISTOGRAM_ALL = True
-PRINT_HISTOGRAM_POSITIVES = True
-
-DO_POST_GRAPHING_ANALYSIS =False
-PRINT_REWARD_GRAPH = True 
+class Fundamentals_Assistant: 
 
 
-if TESTING_ONLY==True: 
-    ticker = 'NOW'
-    test_only(ticker)
-    exit(0)
+    def __init__(self): 
+        #Change these operational variables
+        self.TESTING_ONLY = False
+        self.PRINT_HISTOGRAM_ALL = False
+        self.PRINT_HISTOGRAM_POSITIVES = False
 
-ticker_cik_dict = get_ciks()
-# print("got here!")
-filtered_list = get_filtered_list()
-len_filtered_list = len(filtered_list)
-new_list, ratio_data, concept_data = [],[],[]
-new_list_pos, ratio_data_pos, concept_data_pos = [],[],[]
-nbr_invalids =0 
-nbr_neg_ratios = 0
-cntr =0
+        self.DO_POST_GRAPHING_ANALYSIS =False
+        self.PRINT_REWARD_GRAPH = True 
 
-invalids =[]
 
-progress_bar = tqdm(total= len_filtered_list, desc="setting up the histogram")
-for ticker in filtered_list:
-    print("----working on: ", ticker)
+def get_eps(types_list):
+    ticker_cik_dict = get_ciks()
+    # print("got here!")
+    new_list, ratio_data, concept_data = [],[],[]
+    new_list_pos, ratio_data_pos, concept_data_pos = [],[],[]
+    nbr_invalids =0 
+    nbr_neg_ratios = 0
+    cntr =0
+
+    invalids =[]
+    nbr_invalid_concept_requests = 0
+    nbr_invalid_concept_key = 0
+
+
     cik = ticker_cik_dict[ticker]
+
     # company_fillings= get_company_fillings(cik)
     # simplified_fillings = company_fillings[['accessionNumber', 'reportDate', 'form']].head(50)
 
@@ -54,40 +53,95 @@ for ticker in filtered_list:
     # pp = pprint.PrettyPrinter()
     # pp.pprint(list_facts)
     #each fact (ex. Revenue, Assets) contains several entries as dictionary with filling date and form filed as some of the keys. 
-    concept = get_company_concept(cik, "EarningsPerShareDiluted")
-    # print("forms in the concept", concept.form)
-
-    # break
-
-    # #check structure
-    # # print(concept.columns)
-    # # print(concept.form)
+    concept, response = get_company_concept(cik, "EarningsPerShareDiluted")
+    if response !=0:  
+        if response == -1: 
+            nbr_invalid_concept_requests +=1
+        elif response ==-2: 
+            nbr_invalid_concept_key +=1
 
     # # filter the data
     # concept.form == '10-Q'
     # concept_10Q_only = concept
-    concept_10Q_only = concept[concept.form == '10-Q' ]
+    concept['form'] = concept['form'].astype(str)
+    concept_10Q_only = concept[concept.form.isin(['10-Q', '10-K', '10-Q/A', '10-K/A']) ]
     # if ticker != "CVLT":
-    #     concept_10Q_only= concept.dropna(how='any')
-    # concept_10Q_only = concept_10Q_only.reset_index(drop=True)
-
-
-    # concept_10Q_only = concept_10Q_only[concept_10Q_only.frame != "NaN"]
+    concept_10Q_only= concept_10Q_only.dropna(how='any')
+    concept_10Q_only = concept_10Q_only.reset_index(drop=True)
+    
     if concept_10Q_only.empty: 
         nbr_invalids+=1
         cntr+=1
-        progress_bar.update(1)
+
+    results = tuple(None for _ in range(len(types_list)))
+
+    for idx,type in enumerate(types_list): 
+        if type == "last": 
+            res = concept_10Q_only.iloc[-1]['val']
+        elif type == "trailing": 
+            res = get_trailing_eps(concept)
+        results[idx] = res
+            
+    reversed_df = concept_10Q_only.iloc[::-1]
+
+    counter = 0
+    sett = set()
+    frame_skip=False
+    for index, row in reversed_df.iterrows():
+        # print(row["frame"])
+        if "frame" not in row: 
+            print ("=======>ERROR: FRAME COLUMN DOES NOT EXIST!!!!")
+            with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+                print(concept_10Q_only.to_string(index=False))
+            frame_skip = True
+            break
+
+        if frame_skip: 
+            frame_skip=False
+            continue
+
+        sett.add(row["frame"])
+        counter +=1 
+
+
+    if len(sett) != 4: 
+        print("----working on: ", ticker)
+        print ("=======>ERROR: NON_CONTINGET!!!!")
+        print(sett)
+
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+                print(concept_10Q_only.to_string(index=False))
+
         continue
 
-    # #drops the original index (first column) makes new indexes incrementing due to filtered data only (no gaps)
-    # concept_10Q_only = concept_10Q_only.reset_index(drop=True)
+    years_cntr, quarter_cntr, invalid_cntr = 0,0,0
+    for frame in sett: 
+        if len(frame) == 6: 
+            years_cntr +=1
+        elif len(frame) == 8: 
+            quarter_cntr +=1
+        else: 
+            invalid_cntr +=1
 
-    last_eps = concept_10Q_only.iloc[-1]['val']
-    
-    # print("last eps: ", last_eps)
-    # trailing_yearly_eps = get_trailing_eps(concept)
+    if years_cntr ==1 and quarter_cntr == (4-years_cntr) and invalid_cntr ==0: 
 
-    if ticker == 'CVLT':
+        continue    
+    else:
+        print("----working on: ", ticker)
+        print ("=======>ERROR: NON_CONTINGET!!!!")
+        print("years_cntr: ",years_cntr)
+        print("quarter_cntr: ",quarter_cntr)
+        print("invalid_cntr: ",invalid_cntr)
+        with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+            print(concept.to_string(index=False))
+        continue
+
+    # if ticker == 'CVLT':
+    #     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+    #         print(concept_10Q_only.to_string(index=False))
+
+
+    if trailing_yearly_eps is None:
         with pd.option_context('display.max_rows', None, 'display.max_columns', None):
             print(concept_10Q_only.to_string(index=False))
 
@@ -143,7 +197,7 @@ print("\033[1m","number of invalids (ex. no 10Q): ", nbr_invalids,"\033[0m")
 #we have ratio data pos: all valid ratios (non empty sec, available last price)
 #we have concept data pos: all valid eps (non empty sec, available last price)
 #we have new list pos:list of tickers maching valid data (non empty sec, available last price)
- 
+
 ratio_data_all_np = np.array(ratio_data, dtype="float")
 ratio_data_np = np.array(ratio_data_pos, dtype="float")
 concept_data_np = np.array(concept_data_pos, dtype="float")

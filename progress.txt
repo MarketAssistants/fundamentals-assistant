@@ -1,0 +1,18 @@
+
+Pending: 
+- convert to OOP - Module fashion
+- get trailing eps (follow recursive method (check stock backlog album))
+- Spike: look for ways to improve the histogram reward system (research on how to find deals just 
+By looking at the position in the histogram). 
+
+
+In Progress: 
+- move database to separate folder to be called by other classes. 
+
+
+Done: 
+- get familiar with SEC API. 
+- created generic methods to plot histograms. 
+- get last quarter eps - plot histogram. 
+- create quick reward system to measure "sepecial positioned" tickers in histogram. 
+

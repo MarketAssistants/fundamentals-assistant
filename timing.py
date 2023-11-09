@@ -11,10 +11,7 @@ def tomorrow_date():
     tomorrow = today + timedelta(days=1)
     return tomorrow.strftime("%Y-%m-%d")
 
-from datetime import datetime, timedelta
-
 def last_business_day():
-
     eastern = pytz.timezone('US/Eastern')
     current_time = datetime.now(eastern)
     #new data is available shorty after market close

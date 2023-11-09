@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import requests
+from collections import deque
 
 headers = {"User-Agent": "yacineabc1997@gmail.com"}
 
@@ -37,11 +38,21 @@ def get_company_concept(cik, concept):
     # a concept is for example: revenue
     company_concept = requests.get((f'https://data.sec.gov/api/xbrl/companyconcept/CIK{cik}'f'/us-gaap/{concept}.json'),
     headers=headers)
+    if company_concept.status_code < 200 or company_concept.status_code >= 300:
+        print("concept response invalid")
+        return None,-1
+
+    # print(company_concept)
     company_concept_json = company_concept.json()
+    concept_keys = company_concept_json['units'].keys()
+
+    if 'USD/shares' not in concept_keys: 
+        print("Skipped-keys are: ",company_concept_json['units'].keys() )
+        return None,-2
     # print(company_concept_json)
     concept_df  = pd.DataFrame.from_dict(company_concept_json['units']['USD/shares'])
 
-    return concept_df
+    return concept_df, 0
 
 def test_only(ticker):
     ticker_cik_dict = get_ciks()
@@ -122,6 +133,23 @@ def get_trailing_eps(concept):
 
 
 
+def get_trailing_eps_bytree (data): 
+#date is a data_frame
+
+    list_accepted_forms = ['10-Q', '10-K', '10-Q/A', '10-K/A']
+    disqualified = [] # this will be a list of lists (each list is for a level)
+    visited_queue = deque() #this is a lifo queo (append() to add, pop() to pop)
+    current_level =0 
+    for index, row in data: 
+
+        if row['form'] in  list_accepted_forms: 
+            
+            most_recent_day = row['start'] 
+
+
+
+
+        
 
                 
         
