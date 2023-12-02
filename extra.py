@@ -19,7 +19,7 @@ def get_filtered_list():
 
 
     if RETURN_FINAL_LIST:
-    return tickers_final
+     return tickers_final
         
     num_tickers = len(tickers_secondrun)
     print("number of tickers to begin with: ", num_tickers)

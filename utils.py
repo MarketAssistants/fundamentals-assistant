@@ -42,17 +42,25 @@ def get_company_concept(cik, concept):
         print("concept response invalid")
         return None,-1
 
-    # print(company_concept)
     company_concept_json = company_concept.json()
+    # print("concept keys:", company_concept_json.keys())
     concept_keys = company_concept_json['units'].keys()
-
-    if 'USD/shares' not in concept_keys: 
-        print("Skipped-keys are: ",company_concept_json['units'].keys() )
-        return None,-2
+    # if 'USD/shares' not in concept_keys: 
+    #     print("Skipped-keys are: ",company_concept_json['units'].keys() )
+    #     return None,-2
+    # print("  ",company_concept_json['description'])
     # print(company_concept_json)
-    concept_df  = pd.DataFrame.from_dict(company_concept_json['units']['USD/shares'])
+    # print("unit keys:", concept_keys)
 
-    return concept_df, 0
+    for key in concept_keys:
+        concept_df  = pd.DataFrame.from_dict(company_concept_json['units'][key])
+        # print("full list of columns: ", concept_df.columns.tolist())
+        # pd.set_option('display.max_columns', None)
+        # pd.set_option('display.max_rows', None) 
+        # print(concept_df)
+        concept_df_json  = company_concept_json['units'][key]
+        # print("concept json: ",concept_df_json)
+        return concept_df_json, 0
 
 def test_only(ticker):
     ticker_cik_dict = get_ciks()

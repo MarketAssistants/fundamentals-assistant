@@ -1,5 +1,6 @@
 
 Pending: 
+- I want to graph all these main fundamentals quantities these in a single graph some will have quarterly points and some will have yearly values
 - convert to OOP - Module fashion
 - get trailing eps (follow recursive method (check stock backlog album))
 - Spike: look for ways to improve the histogram reward system (research on how to find deals just 
