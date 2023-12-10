@@ -8,7 +8,6 @@ By looking at the position in the histogram).
 
 
 In Progress: 
-- move database to separate folder to be called by other classes. 
 
 
 Done: 
@@ -16,4 +15,4 @@ Done:
 - created generic methods to plot histograms. 
 - get last quarter eps - plot histogram. 
 - create quick reward system to measure "sepecial positioned" tickers in histogram. 
-
+- move database to separate folder to be called by other classes. 
