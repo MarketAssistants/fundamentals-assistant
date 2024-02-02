@@ -1,5 +1,9 @@
 
 Pending: 
+- graph a list of requested quantities for a certain stock or stocks
+- get the damn trailing eps figured out
+- find where the trailing eps stand in industry/sector/description keyword compared to price/share to find undervalued stocks
+
 - I want to graph all these main fundamentals quantities these in a single graph some will have quarterly points and some will have yearly values
 - convert to OOP - Module fashion
 - get trailing eps (follow recursive method (check stock backlog album))

@@ -1,3 +1,72 @@
+
+# import urllib.request
+
+# xml_url = "https://www.sec.gov/Archives/edgar/data/12927/000122520824000416/xslF345X05/doc4.xml"
+# destination_file = "downloaded_file.xml"
+
+# headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+# req = urllib.request.Request(xml_url, headers=headers)
+
+# # Use urlopen to open the URL and read its content
+# with urllib.request.urlopen(req) as response:
+#     xml_content = response.read()
+
+# # Save the content to a file
+# with open(destination_file, 'wb') as file:
+#     file.write(xml_content)
+
+# print(f"The XML file has been downloaded and saved as {destination_file}")
+
+
+# import json
+# import pandas as pd
+# import requests
+# from collections import deque
+
+# concept = 'Revenues'
+# cik="0001759509"
+# headers = {"User-Agent": "yacineabc1997@gmail.com"}
+# company_facts = requests.get(f'https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json',headers=headers)
+# facts_json = company_facts.json()
+
+# taxonomy_selected = "us-gaap" # default taxonomy
+# for taxonomy in facts_json['facts'].keys(): 
+#     print("-------taxonomy: ",taxonomy)
+#     if concept in facts_json['facts'][taxonomy]: 
+#         taxonomy_selected = taxonomy
+#         print("===== taxonomy CHANGED: (else us-gaap) ", taxonomy_selected)
+#         break
+
+# company_concept = requests.get((f'https://data.sec.gov/api/xbrl/companyconcept/CIK{cik}'f'/{taxonomy_selected}/{concept}.json'),
+# headers=headers)
+# if company_concept.status_code < 200 or company_concept.status_code >= 300:
+#     print("concept response invalid")
+#     exit(0)
+
+# company_concept_json = company_concept.json()
+# # print("concept keys:", company_concept_json.keys())
+# concept_keys = company_concept_json['units'].keys()
+# # if 'USD/shares' not in concept_keys: 
+# #     print("Skipped-keys are: ",company_concept_json['units'].keys() )
+# #     return None,-2
+# # print("  ",company_concept_json['description'])
+# # print(company_concept_json)
+# # print("unit keys:", concept_keys)
+
+# for key in concept_keys:
+#     print("========== key is: ",key)
+#     concept_df  = pd.DataFrame.from_dict(company_concept_json['units'][key])
+#     # print("full list of columns: ", concept_df.columns.tolist())
+#     # pd.set_option('display.max_columns', None)
+#     # pd.set_option('display.max_rows', None) 
+#     # print(concept_df)
+#     concept_df_json  = company_concept_json['units'][key]
+#     # print("concept json: ",concept_df_json)
+#     print( concept_df_json, 0,key)
+
+
+
+
 # from yahoo_fin.stock_info import *
 
 
@@ -23,32 +92,32 @@
 
 # print(tickers_sp500())
 
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd
+# import requests
+# from bs4 import BeautifulSoup
+# import pandas as pd
 
-# URL of the Wikipedia page
-url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+# # URL of the Wikipedia page
+# url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 
-# Send a GET request to fetch the page content
-response = requests.get(url)
+# # Send a GET request to fetch the page content
+# response = requests.get(url)
 
-# Check if the request was successful (status code 200)
-if response.status_code == 200:
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(response.content, "html.parser")
+# # Check if the request was successful (status code 200)
+# if response.status_code == 200:
+#     # Parse the HTML content using BeautifulSoup
+#     soup = BeautifulSoup(response.content, "html.parser")
     
-    # Find the table containing the S&P 500 company data
-    table = soup.find("table", {"class": "wikitable"})
+#     # Find the table containing the S&P 500 company data
+#     table = soup.find("table", {"class": "wikitable"})
 
-    # Read the table using pandas
-    if table:
-        df = pd.read_html(str(table))[0]  # Convert the table to a DataFrame
-        print(df)  # Display the first few rows of the DataFrame
-    else:
-        print("Table not found on the page.")
-else:
-    print("Failed to fetch the page.")
+#     # Read the table using pandas
+#     if table:
+#         df = pd.read_html(str(table))[0]  # Convert the table to a DataFrame
+#         print(df)  # Display the first few rows of the DataFrame
+#     else:
+#         print("Table not found on the page.")
+# else:
+#     print("Failed to fetch the page.")
 
 # import yfinance as yf
 # msft = yf.Ticker("MSFT")
@@ -127,3 +196,8 @@ else:
 # [5.08, 2.82, 2.45, 1.48, 1.27, 1.1, 0.95, 0.86, 0.84, 0.51, 0.31, 0.3, 0.28, 0.27, 0.17, 0.15, 0.13, 0.13, 0.04, 0.04, 0.03, 0.02, 0.01]
 # ['DOCN', 'CDAY', 'CRWD', 'BOX', 'BLKB', 'DT', 'CALX', 'ATEN', 'TDC', 'PRGS', 
 #  'CVLT', 'WDAY', 'PANW', 'PTC', 'AKAM', 'ORCL', 'QLYS', 'VMW', 'PLUS', 'FFIV', 'MSFT', 'ADBE', 'NOW']
+
+report = "getall:jkmmm,lsjh,wear,ioi"
+elements = report.split(':')[1]
+list_reports = elements.split(',')
+print(list_reports)
