@@ -8,12 +8,8 @@ import json
 import matplotlib.pyplot as plt
 import pprint
 from datetime import datetime
+import sys
 
-# from extra import get_filtered_list
-# sys.path.insert(8, '/home/yacbln/MyStuff/Programming/Github/database_assistant')
-# from database_assistant import Database_Assistant
-# sys.path.insert(9, '/home/yacbln/MyStuff/Programming/Github/graphing_assistant')
-from graphing_assistant import Graphing_Assistant
 
 from copy import deepcopy
 from timing import tomorrow_date, today_date,last_business_day
@@ -82,11 +78,11 @@ class Fundamentals_Assistant:
         # simplified_fillings = company_fillings[['accessionNumber', 'reportDate', 'form']].head(50)
 
         # most_recent_filling  = simplified_fillings
-        company_facts_usgaap = get_company_facts(cik)
+        company_facts_usgaap = self.get_company_facts(cik)
         list_facts = company_facts_usgaap.keys()
 
-        # print("all facts:", list_facts)
-        # exit(0)
+        print("all facts:", list_facts)
+        exit(0)
         #BA
         # TreasuryStockSharesAcquired
         # ShareBasedCompensation
@@ -155,7 +151,7 @@ class Fundamentals_Assistant:
             print(concept_name)
             print("=========================================")
 
-            concept, response = get_company_concept(cik, concept_name)
+            concept, response = self.get_company_concept(cik, concept_name)
             print(concept)
             # pd.set_option('display.max_columns', None)
             # pd.set_option('display.max_rows', None) 
@@ -424,10 +420,6 @@ class Fundamentals_Assistant:
         #     print(f"{rank+1} - {ticker}: reward:{reward_winnners[rank]} ratio(rk. {ratio_ranks[rank]}): {ratio_winnners[rank]} eps(rk. {concept_ranks[rank]}): {concept_winners[rank]}")
 
 
-# fund_object= Fundamentals_Assistant()
-# res = fund_object.get_eps(["last"])
-# fund_object.print_matrix_format(np.array([con for con in res]))
-
     def run_reports(self,payload):
         list_reports = self.reports
         if not list_reports:
@@ -464,8 +456,9 @@ class Fundamentals_Assistant:
             #this section for new way of passing report list: name,paramet1,parameter2...as necessary
             if isinstance(report, list):
                 if report[0] == "GetSpecificConcept":
+                    results = self.get_specific_concept(report[1], graphing=False)
+                if report[0] == "GetSpecificConceptGraph":
                     results = self.get_specific_concept(report[1], graphing=True)
-
 
                 reports[report[0]] = results
 
@@ -478,3 +471,11 @@ class Fundamentals_Assistant:
                 reports[report] = results
 
         return {self.ticker:reports}
+    
+
+
+
+# fund_object= Fundamentals_Assistant([],0,None,None)
+# fund_object.ticker = 'DLTR'
+# res = fund_object.get_eps(["last"])
+# fund_object.print_matrix_format(np.array([con for con in res]))

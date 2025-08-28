@@ -1,11 +1,16 @@
         
 import copy
 from datetime import datetime
+import time
 
-def get_specific_concept(self, concept_list, graphing=False):
-
-    cik = self.ticker_cik_dict[self.ticker]
-    print(cik)
+def get_specific_concept(self, concept_list, graphing=False, PRC_CHG = True):
+    time.sleep(1)
+    try:
+        cik = self.ticker_cik_dict[self.ticker]
+        print(cik)
+    except: 
+        print("could not get CIK.")
+        return {}
     # concept_name = "CommonStockSharesOutstanding"
     
     concepts_dict = {}
@@ -23,18 +28,33 @@ def get_specific_concept(self, concept_list, graphing=False):
 
         xy_dict = {"xvals":[], "yvals":[]}
         no_rep_dict = {}
+        initial_iter = True
         for datis in concept.keys(): 
-
             print("looking for date: ", datis)
             # xy_dict["xvals"].append(self.date_secretary.get_date_index(datis, closest=True))
-                
+        
             xy_dict["xvals"].append(datetime.strptime(datis, "%Y-%m-%d"))    
-            if concept_name == "Liabilities" or concept_name == 'StockholdersEquity' or concept_name == "Assets" or concept_name == "LiabilitiesCurrent":
-                val = concept[datis]/200
-            elif concept_name == "Revenues": 
-                val = concept[datis]/50
-            else: 
-                val = concept[datis]
+
+            if PRC_CHG: #prc chg to previous values
+                if initial_iter == True: 
+                    val = 0
+                    prev_value = concept[datis]
+                    initial_iter = False
+                else:
+                    if prev_value != 0:
+                        val = (concept[datis] - prev_value)/prev_value *100
+                    else: 
+                        val = -500
+                    prev_value = concept[datis]
+            else: #actual values
+                if concept_name == "Liabilities" or concept_name == 'StockholdersEquity' or concept_name == "Assets" or concept_name == "LiabilitiesCurrent":
+                    val = concept[datis]/200
+                elif concept_name == "Revenues": 
+                    val = concept[datis]/50
+                elif concept_name == "EarningsPerShareDiluted" or concept_name == "EarningsPerShareBasic": 
+                    val = concept[datis]* 100000000
+                else: 
+                    val = concept[datis]
             # val = concept[datis]
             xy_dict["yvals"].append(val)
 
@@ -57,6 +77,7 @@ def get_specific_concept(self, concept_list, graphing=False):
         xlabel_all = []
         ylabel_all = []
         for concept_key in concepts_dict.keys(): 
+            print(concept_key)
             xy_all["xvals"].append(concepts_dict[concept_key]["xvals"])
             xy_all["yvals"].append(concepts_dict[concept_key]["yvals"])
             title_all.append(concept_key)
@@ -64,6 +85,8 @@ def get_specific_concept(self, concept_list, graphing=False):
             ylabel_all.append(concept_key)
 
         
+
+        print(xy_all)
 
         self.graphing_guy.plot_xy_same(xy_all["xvals"],xy_all["yvals"],title_all,xlabel_all,ylabel_all)
 

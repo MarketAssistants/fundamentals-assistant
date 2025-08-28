@@ -2,17 +2,26 @@ import json
 import pandas as pd
 import requests
 from collections import deque
-
+import time
+from pathlib import Path
+import os
 
 headers = {"User-Agent": "yacineabc1997@gmail.com"}
 
 def get_ciks(self):
-    company_tickers = requests.get( "https://www.sec.gov/files/company_tickers.json" , headers=headers)
-    above_tojson = company_tickers.json()
-    
-    dictt = {}
-    for key in above_tojson.keys(): 
-        dictt[above_tojson[key]["ticker"]] = str(above_tojson[key]["cik_str"]).zfill(10)
+    """Return dict mapping ticker -> zero-padded CIK.
+
+    Looks for company_tickers.json relative to the project root (parent of this file's parent)
+    or uses MA_COMPANY_TICKERS_JSON env var if provided.
+    """
+    project_root = Path(__file__).resolve().parents[1]  # MarketAssistants directory
+    default_path = project_root / 'DATABASE' / 'company_tickers.json'
+    json_path = Path(os.environ.get('MA_COMPANY_TICKERS_JSON', str(default_path)))
+    if not json_path.is_file():
+        raise FileNotFoundError(f"company_tickers.json not found at {json_path}. Set MA_COMPANY_TICKERS_JSON to override.")
+    with json_path.open('r') as file:
+        above_tojson = json.load(file)
+    dictt = {above_tojson[key]["ticker"]: str(above_tojson[key]["cik_str"]).zfill(10) for key in above_tojson.keys()}
     return dictt
 
 def get_company_fillings(cik): 
@@ -111,7 +120,7 @@ def reformat_with_last_quarter_value(self,concept):
                     for item in concept: 
                         if 'frame' in item.keys(): 
                             print(item)
-                    return -1
+                    return adjust_output(concept,data_x,data_y)
 
                 data_x[idx_to_be_replaced] = last_date
                 data_y[idx_to_be_replaced] = last_yearly_value - counter
@@ -149,7 +158,7 @@ def reformat_with_last_quarter_value(self,concept):
                     for item in concept: 
                         if 'frame' in item.keys(): 
                             print(item)
-                    return -1
+                    return adjust_output(concept,data_x,data_y)
 
             if counting : 
                 previous_quarter = last_quarter
@@ -160,7 +169,7 @@ def reformat_with_last_quarter_value(self,concept):
                     for item in concept: 
                         if 'frame' in item.keys(): 
                             print(item)
-                    return -1
+                    return adjust_output(concept,data_x,data_y)
 
                 if last_quarter!=4:
                     counter += entry['val']
@@ -171,7 +180,7 @@ def reformat_with_last_quarter_value(self,concept):
                     for item in concept: 
                         if 'frame' in item.keys(): 
                             print(item)
-                    return -1
+                    return adjust_output(concept,data_x,data_y)
                 counter += entry['val']
                 counting = True
 
@@ -182,6 +191,9 @@ def reformat_with_last_quarter_value(self,concept):
             data_y.append(entry['val'])  
             data_q.append(f'{year}Q{last_quarter}')          
 
+    return adjust_output(concept,data_x,data_y)
+
+def adjust_output(concept,data_x,data_y):
     results_dic = {}       
     if len(data_x) != len(data_y): 
         print(f"[ERROR] length of datax {len(data_x)} NOT MATCH length of datay {len(data_y)}")
@@ -196,6 +208,7 @@ def reformat_with_last_quarter_value(self,concept):
         results_dic[dt] = data_y[len_datay-1-ii]
 
     return results_dic
+
 
 def get_company_concept(self,cik, concept): 
 
@@ -237,8 +250,7 @@ def get_company_concept(self,cik, concept):
         concept_df_json  = company_concept_json['units'][key]
         # print("concept json: ",concept_df_json)
 
-        # print("***** before reformating: ", concept_df_json)
-
+        print("***** before reformating: ", concept_df_json)
         concept_json_reformated = reformat_with_last_quarter_value(self,concept_df_json)
 
         # print("********* reformated json: ", concept_json_reformated)
@@ -337,12 +349,11 @@ def get_trailing_eps_bytree (data):
 
         if row['form'] in  list_accepted_forms: 
             
-            most_recent_day = row['start'] 
+            most_recent_day = row['start']
 
 
 
 
-        
 
-                
-        
+
+
